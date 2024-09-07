@@ -18,9 +18,8 @@ rm -rf ${RESULT_DIR}
 mkdir -p ${RESULT_DIR}
 
 # 2. Run ASTRA-sim
-"${BINARY}" \
-    --run-name="Exercise 1" \
-    --network-configuration="${NETWORK}" \
-    --system-configuration="${SYSTEM}" \
-    --workload-configuration="${WORKLOAD}" \
-    --path="${RESULT_DIR}/"
+../extern/network_backend/ns-3/build/scratch/ns3-dev-AstraSimNetwork-default \
+    --workload-configuration=./inputs/all_reduce.txt \
+    --network-configuration=./inputs/ring.json \
+    --system-configuration=./inputs/ring.txt \
+

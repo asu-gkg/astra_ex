@@ -1,25 +1,48 @@
-#!/bin/bash
-set -e
+#! /bin/bash -v
 
-# Path
-SCRIPT_DIR="$(dirname "$(realpath $0)")"
-BINARY="${SCRIPT_DIR:?}"/../build/astra_analytical/build/AnalyticalAstra/bin/AnalyticalAstra
-RESULT_DIR="${SCRIPT_DIR}/result_1-1"
+# Absolue path to this script
+SCRIPT_DIR=$(dirname "$(realpath $0)")
 
-# Inputs
-NETWORK="${SCRIPT_DIR}/inputs/network/ring.json"
-SYSTEM="${SCRIPT_DIR}/inputs/system/ring.txt"
-WORKLOAD="${SCRIPT_DIR}/inputs/workload/all_reduce.txt"
+# Absolute paths to useful directories
+BINARY=""
+NETWORK=""
+CONFIG=""
+SYNTHETIC=""
+SYSTEM="${SCRIPT_DIR:?}"/../inputs/system/sample_torus_sys.txt
+WORKLOAD="${SCRIPT_DIR:?}"/../inputs/workload/microAllReduce.txt
+STATS="${SCRIPT_DIR:?}"/results/run_allreduce
 
+while getopts n: flag
+do
+    case "${flag}" in
+        n) network=${OPTARG};;
+    esac
+done
 
-# 1. Setup
-rm -rf "${RESULT_DIR}"
-mkdir -p "${RESULT_DIR}"
+echo "network: $network";
 
-# 2. Run ASTRA-sim
-"${BINARY}" \
-    --run-name="Exercise 1" \
-    --network-configuration="${NETWORK}" \
-    --system-configuration="${SYSTEM}" \
-    --workload-configuration="${WORKLOAD}" \
-    --path="${RESULT_DIR}/"
+if [ "$network" == "garnet" ]
+then
+	BINARY="${SCRIPT_DIR:?}"/../build/astra_garnet/build/gem5.opt
+	NETWORK="${SCRIPT_DIR:?}"/../inputs/network/garnet/sample_torus
+        SYNTHETIC="--synthetic=training"
+        CONFIG="${SCRIPT_DIR:?}"/../extern/network_backend/garnet/gem5_astra/configs/example/garnet_synth_traffic.py
+elif [ "$network" == "analytical" ]
+then
+    BINARY="${SCRIPT_DIR:?}"/../build/astra_analytical/build/AnalyticalAstra/bin/AnalyticalAstra
+	NETWORK="${SCRIPT_DIR:?}"/../inputs/network/analytical/sample_Torus3D.json
+fi
+
+rm -rf "${STATS}"
+mkdir "${STATS}"
+
+"${BINARY}" "${CONFIG}" "$SYNTHETIC"  \
+--network-configuration="${NETWORK}" \
+--system-configuration="${SYSTEM}" \
+--workload-configuration="${WORKLOAD}" \
+--path="${STATS}/" \
+--run-name="sample_all_reduce" \
+--num-passes=2 \
+--total-stat-rows=1 \
+--stat-row=0
+

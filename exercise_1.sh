@@ -18,8 +18,8 @@ rm -rf ${RESULT_DIR}
 mkdir -p ${RESULT_DIR}
 
 # 2. Run ASTRA-sim
-../extern/network_backend/ns-3/build/scratch/ns3-dev-AstraSimNetwork-default \
-    --workload-configuration=./inputs/all_reduce.txt \
-    --network-configuration=./inputs/ring.json \
-    --system-configuration=./inputs/ring.txt \
-
+../build/astra_analytical/build/AnalyticalAstra/bin/AnalyticalAstra \
+  --workload-configuration=./inputs/workload/ASTRA-sim-1.0/Resnet50_DataParallel.txt \
+  --network-configuration=./inputs/network/analytical/FullyConnected.yml \
+  --system-configuration=./inputs/system/FullyConnected.json \
+  --remote-memory-configuration=./inputs/remote_memory/analytical/no_memory_expansion.json
